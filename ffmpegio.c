@@ -4,25 +4,13 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-int panicf(const char *fmt, ...)
-{
-	va_list argp;
-	va_start(argp, fmt);
-	const int ret = fprintf(stderr, fmt, argp);
-	if (ret != 0)
-		exit(ret);
-	va_end(argp);
-	exit(1);
-}
-
-int panic(const char *msg)
-{
-	return panicf(msg);
-}
+#include "utils.h"
 
 int main(int argc, char* argv[]){
-	if (argc < 2)
+	if (argc < 2) {
 		fprintf(stderr, "usage: %s <input.mp4>", argv[0]);
+		return 2;
+	}
 
 	// Setup input context, decoder, and decoder context.
 	int             video_stream = -1;

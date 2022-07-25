@@ -1,4 +1,4 @@
-PROG=ffmpeg-io
+PROG=ffmpegio
 
 FFMPEG_LIBS= libavdevice   \
              libavformat   \
@@ -17,7 +17,7 @@ LDFLAGS := $(shell pkg-config --libs $(FFMPEG_LIBS)) $(LDLIBS)
 
 all: ${PROG}
 
-$(PROG): main.c
-	gcc $(CFLAGS) main.c $(LDFLAGS) -o $(PROG)
+$(PROG): *.c
+	gcc $(CFLAGS) *.c $(LDFLAGS) -o $(PROG)
 clean:
 	rm -f ${PROG}
