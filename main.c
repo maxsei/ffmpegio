@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -22,133 +23,75 @@ int panic(const char *msg)
 	return panicf(msg);
 }
 
-void list_codecs()
-{
-	void* iterate_data = NULL;
-	const AVCodec* current_codec = av_codec_iterate(&iterate_data);
-	while (current_codec != NULL)
-	{
-		printf("name: %s long_name: %s\n", current_codec->name, current_codec->long_name);
-		current_codec = av_codec_iterate(&iterate_data);
-	}
-}
+int main(int argc, char* argv[]){
+	if (argc < 2)
+		fprintf(stderr, "usage: %s <input.mp4>", argv[0]);
 
-static void decode(
-	AVCodecContext *dec_ctx,
-	AVFrame *frame,
-	AVPacket *pkt
-)
-{
-	const char *filename = "some-random-filenameeee";
-	char buf[1024];
-	int ret;
- 
-	ret = avcodec_send_packet(dec_ctx, pkt);
-	if (ret < 0)
-		panic("error sending a packet for decoding\n");
- 
-	while (ret >= 0) {
-		ret = avcodec_receive_frame(dec_ctx, frame);
-		if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
-			return;
-		else if (ret < 0)
-			panic("error during decoding\n");
- 
-		printf("saving frame %3d\n", dec_ctx->frame_number);
-		fflush(stdout);
- 
-		/* the picture is allocated by the decoder. no need to
-		   free it */
-		snprintf(buf, sizeof(buf), "%s-%d", filename, dec_ctx->frame_number);
-	}
-}
+	// Setup input context, decoder, and decoder context.
+	AVCodec		*decoder	 = NULL;
+	AVCodecContext *decoder_ctx = NULL;
+	int video_stream = -1;
+	AVFormatContext *input_ctx = NULL;
 
-int main(){
-	const char *filename = "vid.mp4";
-
-	// Infer format from filename.
-	// TODO: maybe try multiple formats to see what works?
-	// const AVOutputFormat *format = av_guess_format("mp4", NULL, NULL);
-	const AVOutputFormat *format = av_guess_format(NULL, filename, NULL);
-	if (!format)
-		panicf("couldn't infer vid format from filename %s", filename);
-
-	// printf("format->video_codec: %u enum: %u\n", format->video_codec, AV_CODEC_ID_H264);
-
-	// Find the codec.
-	// const AVCodec *codec = avcodec_find_decoder(AV_CODEC_ID_H264);
-	const AVCodec *codec = avcodec_find_decoder(format->video_codec);
-	if (!codec)
-		panic("codec not found");
+	#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100)
+		av_register_all();
+	#endif
+	if (avformat_open_input(&input_ctx, argv[1], NULL, NULL) != 0)
+		panic("avformat_open_input");
+	if (avformat_find_stream_info(input_ctx, NULL) < 0)
+		panic("avformat_find_stream_info");
+	video_stream = av_find_best_stream(input_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, &decoder, 0);
+	if (video_stream < 0)
+		panic("av_find_best_stream");
+	decoder_ctx = avcodec_alloc_context3(decoder);
+	if (!decoder_ctx)
+		panic("avcodec_alloc_context3");
+	if (avcodec_parameters_to_context(decoder_ctx, input_ctx->streams[video_stream]->codecpar) < 0)
+		panic("avcodec_parameters_to_context");
 
 
-	// Init parser.
-	AVCodecParserContext *parser = av_parser_init(codec->id);
-	if (!parser)
-		panic("parser not found");
+	// Open video stream.
+	if (avcodec_open2(decoder_ctx, decoder, NULL) < 0)
+		panic("avcodec_open2");
+	printf("Opened input video stream: %dx%d\n", decoder_ctx->width, decoder_ctx->height);
 
-	// Inic codec context.
-	AVCodecContext *c = avcodec_alloc_context3(codec);
-	if (!c)
-		panic("could not allocate video codec context");
 
-	// Open codec.
-	if (avcodec_open2(c, codec, NULL) < 0)
-		panic("could not open codec");
 
-	// Open video file.
-	FILE *f = fopen(filename, "rb");
-	if (!f)
-		panicf("could not open %s", filename);
+	// Extract frames.
+	AVPacket packet;
+	AVFrame  *frame = av_frame_alloc();
+	if (!frame)
+		panic("av_frame_alloc");
+	int  frameno         = 0;
+	bool packet_valid    = false;
+	bool want_new_packet = true;
+	for(; packet_valid || want_new_packet ;){
+		// prepare frame and packet for re-use
+		if (packet_valid) { av_packet_unref(&packet); packet_valid = false; }
 
-	 // Allocate frame.
-	 AVFrame *frame = av_frame_alloc();
-	 if (!frame)
-	 	panic("could not allocate video frame");
-
-	// Decode frames.
-	uint8_t inbuf[INBUF_SIZE + AV_INPUT_BUFFER_PADDING_SIZE];
-	size_t data_size;
-	int eof;
-	uint8_t *data;
-	int ret;
-
-	// Allocate packet.
-	AVPacket *pkt = av_packet_alloc();
-	if (!pkt)
-		panic("couldn't allocate packet");
-
-	// set end of buffer to 0 (this ensures that no overreading happens for damaged MPEG streams)
-	memset(inbuf + INBUF_SIZE, 0, AV_INPUT_BUFFER_PADDING_SIZE);
-
-	do {
-		/* read raw data from the input file */
-		data_size = fread(inbuf, 1, INBUF_SIZE, f);
-		if (ferror(f))
-			break;
-		eof = !data_size;
- 
-		/* use the parser to split the data into frames */
-		data = inbuf;
-		while (data_size > 0 || eof) {
-			ret = av_parser_parse2(parser, c, &pkt->data, &pkt->size,
-								   data, data_size, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
-			if (ret < 0)
-				panic("error while parsing\n");
-
-			data	  += ret;
-			data_size -= ret;
- 
-			if (pkt->size)
-				decode(c, frame, pkt);
-			else if (eof)
-				break;
+		// read compressed data from stream and send it to the decoder
+		if (want_new_packet) {
+			if (av_read_frame(input_ctx, &packet) < 0)
+				break;  // end of stream
+			packet_valid = true;
+			if (packet.stream_index != video_stream)
+				continue;  // not a video packet
+			if (avcodec_send_packet(decoder_ctx, &packet) < 0)
+				panic("avcodec_send_packet");
+			want_new_packet = false;
 		}
-	} while (!eof);
 
-
-
-	// TODO: free resources.
-	fclose(f);
-	return 0;
+		// retrieve a frame from the decoder
+		int ret = avcodec_receive_frame(decoder_ctx, frame);
+		if ((ret == AVERROR(EAGAIN)) || (ret == AVERROR_EOF)) {
+			want_new_packet = true;
+			continue;  // no more frames ready from the decoder -> decode new ones
+		}
+		else if (ret < 0) {
+			panic("avcodec_receive_frame");
+		}
+		printf("\rframe #%d (%c) ", ++frameno, av_get_picture_type_char(frame->pict_type));
+		fflush(stdout);
+	}
+	printf("\n%s has %d frame(s)\n", argv[1], frameno);
 }
