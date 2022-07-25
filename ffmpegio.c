@@ -4,7 +4,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-#include "utils.h"
+#include "panic.h"
 
 int main(int argc, char* argv[]){
 	if (argc < 2) {
