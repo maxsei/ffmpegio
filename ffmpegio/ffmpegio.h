@@ -21,7 +21,7 @@ typedef enum FFMPEGIOError {
 	FFMPEGIO_ERROR_SKIP,
 } FFMPEGIOError;
 
-const char* fmmpegio_error(FFMPEGIOError err);
+const char* ffmpegio_error(FFMPEGIOError err);
 
 
 typedef struct FFMPEGIOContext{

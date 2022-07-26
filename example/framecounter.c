@@ -4,8 +4,8 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-#include "ffmpegio.h"
-#include "panic.h"
+#include <ffmpegio/ffmpegio.h>
+#include <ffmpegio/panic.h>
 
 int main(int argc, char* argv[]){
 	if (argc < 2) {
@@ -19,7 +19,7 @@ int main(int argc, char* argv[]){
 	ffmpegio_init(&ctx);
 	err = ffmpegio_open(&ctx, argv[1]);
 	if (err < 0)
-		panic(fmmpegio_error(err));
+		panic(ffmpegio_error(err));
 
 
 	AVFrame *frame = av_frame_alloc();
@@ -42,5 +42,5 @@ int main(int argc, char* argv[]){
 
 	err = ffmpegio_close(&ctx);
 	if (err < 0)
-		panic(fmmpegio_error(err));
+		panic(ffmpegio_error(err));
 }

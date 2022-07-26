@@ -1,2 +1,4 @@
 ffmpegio
 *.mp4
+bin/*
+!bin/.gitkeep

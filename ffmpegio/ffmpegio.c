@@ -103,7 +103,7 @@ FFMPEGIOError ffmpegio_close(FFMPEGIOContext *ctx)
 	return 0;
 }
 
-const char* fmmpegio_error(FFMPEGIOError err)
+const char* ffmpegio_error(FFMPEGIOError err)
 {
 	switch(err){
 		case FFMPEGIO_ERROR_AVFORMAT_OPEN_INPUT: return "FFMPEGIO_ERROR_AVFORMAT_OPEN_INPUT";
