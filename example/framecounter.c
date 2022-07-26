@@ -4,8 +4,8 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-#include <ffmpegio/ffmpegio.h>
-#include <ffmpegio/panic.h>
+#include "ffmpegio/ffmpegio.h"
+#include "ffmpegio/panic.h"
 
 int main(int argc, char* argv[]){
 	if (argc < 2) {

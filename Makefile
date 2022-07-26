@@ -8,10 +8,8 @@ FFMPEG_LIBS= libavdevice   \
 
 CFLAGS += -Wall -g -fPIC
 CFLAGS := $(shell pkg-config --cflags $(FFMPEG_LIBS)) $(CFLAGS)
-CFLAGS_EXAMPLES = -I./
 
-LDFLAGS := $(shell pkg-config --libs $(FFMPEG_LIBS)) $(LDLIBS)
-LDFLAGS_EXAMPLES = -l ffmpegio
+LDFLAGS := $(shell pkg-config --libs $(FFMPEG_LIBS))
 
 export CGO_ENABLED=1
 export CGO_LDFLAGS=$(LDFLAGS)
@@ -22,10 +20,11 @@ SOURCES_GO=$(wildcard ./ffmpegio/*.c)
 
 all: test
 
-example-framecounter: ./example/framecounter.c $(SOURCES_C)
-	gcc $(CFLAGS) $(CFLAGS_EXAMPLES) ./example/framecounter.c $(LDFLAGS) $(LDFLAGS_EXAMPLES) -o ./bin/framecounter
-	# gcc $(CFLAGS) $(CFLAGS_EXAMPLES) ./example/framecounter.c $(LDFLAGS) -l ./lib -o ./bin/framecounter
-	# cd ./example; pwd; gcc $(CFLAGS) framecounter.c $(LDFLAGS) -o ../bin/framecounter
+framecounterc: ./example/framecounter.c $(SOURCES_C)
+	gcc $(CFLAGS) -I./ $^ $(LDFLAGS) -o ./bin/framecounterc
+
+	# TODO: figure out how to statically link this.
+	# gcc $(CFLAGS) -I./ $^ -static $(LDFLAGS) -o ./bin/framecounter-static
 
 test: $(SOURCES_C) $(SOURCES_GO)
 	go test ./ffmpegio
