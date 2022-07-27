@@ -3,6 +3,6 @@ This is a testing repo to play around with building a frame decoder that can be 
 
 
 # TODO:
-- [ ]: statically compile (ffmpeg, libc, etc included finaly binary)
-- [ ]: seeking packets
-- [ ]: test for memory leaks
+- [ ] statically compile (ffmpeg, libc, etc included finaly binary)
+- [ ] seeking packets
+- [ ] test for memory leaks
