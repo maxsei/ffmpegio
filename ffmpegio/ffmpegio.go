@@ -80,12 +80,22 @@ func (ctx *Context) Read(frame *Frame) error {
 	if err == GoFFMPEGIO_ERROR_NONE {
 		return nil
 	}
+	// if err < GoFFMPEGIO_ERROR_NONE {
+	// 	ctx.valid = false
+	// 	frame.valid = false
+	// }
 	return err
 }
 func (ctx *Context) Skip() error {
 	return FFMPEGIOError(0)
 }
 func (ctx *Context) Close() error {
+	// if ctx == nil {
+	// 	return nil
+	// }
+	if !ctx.valid {
+		return nil
+	}
 	ctx.valid = false
 	ret := C.ffmpegio_close((*C.FFMPEGIOContext)(unsafe.Pointer(ctx.ctx)))
 	err := FFMPEGIOError(ret)
@@ -108,6 +118,12 @@ type Frame struct {
 func (f *Frame) Valid() bool { return f.valid }
 
 func (f *Frame) Close() error {
+	// if f == nil {
+	// 	return nil
+	// }
+	if !f.valid {
+		return nil
+	}
 	f.valid = false
 	C.av_frame_free(&f.frame)
 	return FFMPEGIOError(0)

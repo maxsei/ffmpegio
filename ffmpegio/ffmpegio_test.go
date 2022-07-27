@@ -6,6 +6,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestInvalidPath(t *testing.T) {
+	// Open context to file.
+	_, err := OpenContext("./some/non/existent/filepath/65563e51-28c1-4870-bf7a-4bef8112662b.mp4")
+	assert.Equal(t, GoFFMPEGIO_ERROR_AVFORMAT_OPEN_INPUT, err)
+	// defer ctx.Close()
+}
+
 func TestFramecounter(t *testing.T) {
 	// ffprobe -v error -select_streams v:0 -count_packets -show_entries stream=nb_read_packets -of csv=p=0 ./sample.mp4
 	const frameCountExpected int = 195
