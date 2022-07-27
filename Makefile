@@ -15,8 +15,9 @@ export CGO_ENABLED=1
 export CGO_LDFLAGS=$(LDFLAGS)
 export CGO_CFLAGS=$(CFLAGS)
 
+EXAMPLE_C=$(wildcard ./example/*.c)
 SOURCES_C=$(wildcard ./ffmpegio/*.c)
-SOURCES_GO=$(wildcard ./ffmpegio/*.c)
+SOURCES_GO=$(wildcard ./ffmpegio/*.go)
 
 all: framecounterc mainc test
 
@@ -31,5 +32,8 @@ mainc: ./example/main.c $(SOURCES_C)
 
 test: $(SOURCES_C) $(SOURCES_GO)
 	go test -v ./ffmpegio
+fmt: $(SOURCES_C) $(SOURCES_GO) $(EXAMPLE_C)
+	clang-format -i --style=google $(EXAMPLE_C) $(SOURCES_C)
+	go fmt $(SOURCES_GO)
 clean:
 	rm -f $(filter-out bin/.gitkeep, $(wildcard bin/*))

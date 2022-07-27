@@ -11,6 +11,7 @@
   in
     pkgs.mkShell {
       nativeBuildInputs = with pkgs.buildPackages; [ 
+	clang
 	pkg-config
 	gef
 	gcc
