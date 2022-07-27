@@ -17,9 +17,6 @@ int main(int argc, char* argv[]){
 	AVCodec	        *decoder	= NULL;
 	AVCodecContext  *decoder_ctx	= NULL;
 	AVPacket        packet;
-	bool            packet_valid	= false;
-	bool            want_new_packet	= true;
-
 
 	// Find best input video stream.
 	if (avformat_open_input(&input_ctx, argv[1], NULL, NULL) != 0)

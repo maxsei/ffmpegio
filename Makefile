@@ -18,13 +18,16 @@ export CGO_CFLAGS=$(CFLAGS)
 SOURCES_C=$(wildcard ./ffmpegio/*.c)
 SOURCES_GO=$(wildcard ./ffmpegio/*.c)
 
-all: test
+all: framecounterc mainc test
 
 framecounterc: ./example/framecounter.c $(SOURCES_C)
 	gcc $(CFLAGS) -I./ $^ $(LDFLAGS) -o ./bin/framecounterc
 
 	# TODO: figure out how to statically link this.
 	# gcc $(CFLAGS) -I./ $^ -static $(LDFLAGS) -o ./bin/framecounter-static
+
+mainc: ./example/main.c $(SOURCES_C)
+	gcc $(CFLAGS) -I./ $^ $(LDFLAGS) -o ./bin/mainc
 
 test: $(SOURCES_C) $(SOURCES_GO)
 	go test -v ./ffmpegio
