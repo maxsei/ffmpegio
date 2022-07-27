@@ -7,11 +7,11 @@ import (
 )
 
 func TestFramecounter(t *testing.T) {
-	// ffprobe -v error -select_streams v:0 -count_packets -show_entries stream=nb_read_packets -of csv=p=0 ./PXL_20210526_011323654.mp4
+	// ffprobe -v error -select_streams v:0 -count_packets -show_entries stream=nb_read_packets -of csv=p=0 ./sample.mp4
 	const frameCountExpected int = 195
 
 	// Open context to file.
-	ctx, err := OpenContext("./PXL_20210526_011323654.mp4")
+	ctx, err := OpenContext("../sample.mp4")
 	if err != nil {
 		t.Error(err)
 	}

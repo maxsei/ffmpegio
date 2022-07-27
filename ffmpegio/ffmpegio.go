@@ -38,13 +38,9 @@ const (
 type FFMPEGIOError int
 
 func (err FFMPEGIOError) Error() string {
-	switch err {
-	// C FFMPEGIOError's
-	default:
-		p := C.ffmpegio_error(C.FFMPEGIOError(err))
-		s := C.GoString(p)
-		return s
-	}
+	p := C.ffmpegio_error(C.FFMPEGIOError(err))
+	s := C.GoString(p)
+	return s
 }
 
 func OpenContext(filepath string) (*Context, error) {
