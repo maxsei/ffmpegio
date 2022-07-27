@@ -117,7 +117,7 @@ const char* ffmpegio_error(FFMPEGIOError err)
 		case FFMPEGIO_ERROR_NONE: return "FFMPEGIO_ERROR_NONE";
 		case FFMPEGIO_ERROR_EOF: return "FFMPEGIO_ERROR_EOF";
 		case FFMPEGIO_ERROR_SKIP: return "FFMPEGIO_ERROR_SKIP";
-		default: panicf("no such error code %d", err);
+		// default: panicf("no such error code %d", err);
 	}
-	return "";
+	return "FFMPEGIO_ERROR_UNKNOWN";
 }

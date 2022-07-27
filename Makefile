@@ -27,7 +27,6 @@ framecounterc: ./example/framecounter.c $(SOURCES_C)
 	# gcc $(CFLAGS) -I./ $^ -static $(LDFLAGS) -o ./bin/framecounter-static
 
 test: $(SOURCES_C) $(SOURCES_GO)
-	go test ./ffmpegio
+	go test -v ./ffmpegio
 clean:
-	# rm -f $(filter-out lib/.gitkeep, $(wildcard lib/*))
-	rm -f $(filter-out lib/.gitkeep, $(wildcard lib/*))
+	rm -f $(filter-out bin/.gitkeep, $(wildcard bin/*))
