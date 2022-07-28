@@ -9,5 +9,6 @@
 	pkg-config
 	gcc
         ffmpeg
+	go
       ];
     }
