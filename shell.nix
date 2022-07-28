@@ -17,5 +17,6 @@
 	gef
 	gcc
         ffmpeg
+	go
       ];
     }
