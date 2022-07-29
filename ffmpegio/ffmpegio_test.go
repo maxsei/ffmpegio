@@ -15,7 +15,7 @@ func TestInvalidPath(t *testing.T) {
 
 func TestFramecounter(t *testing.T) {
 	// ffprobe -v error -select_streams v:0 -count_packets -show_entries stream=nb_read_packets -of csv=p=0 ./sample.mp4
-	const frameCountExpected int = 195
+	const frameCountExpected int = 4
 
 	// Open context to file.
 	ctx, err := OpenContext("../sample.mp4")

@@ -36,4 +36,5 @@ fmt: $(SOURCES_C) $(SOURCES_GO) $(EXAMPLE_C)
 	clang-format -i --style=google $(EXAMPLE_C) $(SOURCES_C)
 	go fmt $(SOURCES_GO)
 clean:
+	go clean -testcache
 	rm -f $(filter-out bin/.gitkeep, $(wildcard bin/*))
