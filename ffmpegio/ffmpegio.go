@@ -1,6 +1,7 @@
 package ffmpegio
 
 /*
+#cgo pkg-config: libavdevice libavformat libavfilter libavcodec libswresample libswscale libavutil 
 #include <stdlib.h>
 
 #include <libavcodec/avcodec.h>

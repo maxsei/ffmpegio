@@ -11,9 +11,9 @@ CFLAGS := $(shell pkg-config --cflags $(FFMPEG_LIBS)) $(CFLAGS)
 
 LDFLAGS := $(shell pkg-config --libs $(FFMPEG_LIBS))
 
-export CGO_ENABLED=1
-export CGO_LDFLAGS=$(LDFLAGS)
-export CGO_CFLAGS=$(CFLAGS)
+# export CGO_ENABLED=1
+# export CGO_LDFLAGS=$(LDFLAGS)
+# export CGO_CFLAGS=$(CFLAGS)
 
 EXAMPLE_C=$(wildcard ./example/*.c)
 SOURCES_C=$(wildcard ./ffmpegio/*.c)
