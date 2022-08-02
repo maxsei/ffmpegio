@@ -18,5 +18,6 @@
 	gcc
         ffmpeg
 	go
+	delve
       ];
     }

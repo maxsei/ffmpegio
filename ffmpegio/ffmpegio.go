@@ -33,6 +33,7 @@ const (
 	// END C FFMPEGIOError
 
 	// BEGIN Go FFMPEGIOError
+	GoFFMPEGIO_ERROR_INVALID
 	// END Go FFMPEGIOError
 )
 
@@ -62,8 +63,7 @@ func OpenContext(filepath string) (*Context, error) {
 		return nil, err
 	}
 
-	// Initialize packet and set valid.
-	ctx.ctx.packet = (*C.AVPacket)(C.malloc(C.size_t(unsafe.Sizeof(C.AVPacket{}))))
+	// Set valid.
 	ctx.valid = true
 	return ctx, nil
 }
@@ -91,13 +91,14 @@ func (ctx *Context) Skip() error {
 	return FFMPEGIOError(0)
 }
 func (ctx *Context) Close() error {
-	// if ctx == nil {
-	// 	return nil
-	// }
+	if ctx == nil {
+		return GoFFMPEGIO_ERROR_INVALID
+	}
 	if !ctx.valid {
-		return nil
+		return GoFFMPEGIO_ERROR_INVALID
 	}
 	ctx.valid = false
+
 	ret := C.ffmpegio_close((*C.FFMPEGIOContext)(unsafe.Pointer(ctx.ctx)))
 	err := FFMPEGIOError(ret)
 	return err
@@ -119,11 +120,11 @@ type Frame struct {
 func (f *Frame) Valid() bool { return f.valid }
 
 func (f *Frame) Close() error {
-	// if f == nil {
-	// 	return nil
-	// }
+	if f == nil {
+		return GoFFMPEGIO_ERROR_INVALID
+	}
 	if !f.valid {
-		return nil
+		return GoFFMPEGIO_ERROR_INVALID
 	}
 	f.valid = false
 	C.av_frame_free(&f.frame)

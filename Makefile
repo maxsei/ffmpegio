@@ -15,6 +15,7 @@ LDFLAGS := $(shell pkg-config --libs $(FFMPEG_LIBS))
 # export CGO_LDFLAGS=$(LDFLAGS)
 # export CGO_CFLAGS=$(CFLAGS)
 
+
 EXAMPLE_C=$(wildcard ./example/*.c)
 SOURCES_C=$(wildcard ./ffmpegio/*.c)
 SOURCES_GO=$(wildcard ./ffmpegio/*.go)
@@ -32,9 +33,11 @@ mainc: ./example/main.c $(SOURCES_C)
 
 test: $(SOURCES_C) $(SOURCES_GO)
 	go test -v ./ffmpegio
+debug: $(SOURCES_C) $(SOURCES_GO)
+	export CGO_CFLAGS=-Wno-error; dlv test ./ffmpegio
 fmt: $(SOURCES_C) $(SOURCES_GO) $(EXAMPLE_C)
 	clang-format -i --style=google $(EXAMPLE_C) $(SOURCES_C)
 	go fmt $(SOURCES_GO)
 clean:
-	go clean -testcache
+	go clean -testcache -cache
 	rm -f $(filter-out bin/.gitkeep, $(wildcard bin/*))

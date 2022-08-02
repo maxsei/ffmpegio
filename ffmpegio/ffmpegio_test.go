@@ -6,11 +6,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const samplePath = "../sample.mp4"
+
+func TestContextClose(t *testing.T) {
+	// Open context to file.
+	ctx, err := OpenContext(samplePath)
+	if err != nil {
+		t.Fatal(t)
+	}
+	// Try closing context.
+	defer func(){
+		if r := recover(); r != nil {
+			t.Fatalf("panic in ctx.Close(): %v", r)
+		}
+	}()
+	ctx.Close()
+}
+
 func TestInvalidPath(t *testing.T) {
 	// Open context to file.
-	_, err := OpenContext("./some/non/existent/filepath/65563e51-28c1-4870-bf7a-4bef8112662b.mp4")
+	ctx, err := OpenContext("./some/non/existent/filepath/65563e51-28c1-4870-bf7a-4bef8112662b.mp4")
 	assert.Equal(t, GoFFMPEGIO_ERROR_AVFORMAT_OPEN_INPUT, err)
-	// defer ctx.Close()
+	defer ctx.Close()
 }
 
 func TestFramecounter(t *testing.T) {
@@ -18,7 +35,7 @@ func TestFramecounter(t *testing.T) {
 	const frameCountExpected int = 4
 
 	// Open context to file.
-	ctx, err := OpenContext("../sample.mp4")
+	ctx, err := OpenContext(samplePath)
 	if err != nil {
 		t.Error(err)
 	}

@@ -46,6 +46,11 @@ FFMPEGIOError ffmpegio_open(FFMPEGIOContext *ctx, char *filepath) {
 }
 
 FFMPEGIOError ffmpegio_read(FFMPEGIOContext *ctx, AVFrame *frame) {
+  // Allocate packet if not allocated.
+  if (ctx->packet == NULL) {
+    ctx->packet = (AVPacket*)(malloc(sizeof(AVPacket)));
+  }
+
   if (!(ctx->packet_valid || ctx->want_new_packet)) {
     return FFMPEGIO_ERROR_EOF;
   }
