@@ -2,9 +2,11 @@
 
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "libavutil/imgutils.h"
 #include "panic.h"
 
 void ffmpegio_init(FFMPEGIOContext *ctx) {
@@ -48,7 +50,7 @@ FFMPEGIOError ffmpegio_open(FFMPEGIOContext *ctx, char *filepath) {
 FFMPEGIOError ffmpegio_read(FFMPEGIOContext *ctx, AVFrame *frame) {
   // Allocate packet if not allocated.
   if (ctx->packet == NULL) {
-    ctx->packet = (AVPacket*)(malloc(sizeof(AVPacket)));
+    ctx->packet = (AVPacket *)(malloc(sizeof(AVPacket)));
   }
 
   if (!(ctx->packet_valid || ctx->want_new_packet)) {
@@ -90,6 +92,20 @@ FFMPEGIOError ffmpegio_read(FFMPEGIOContext *ctx, AVFrame *frame) {
 }
 
 FFMPEGIOError ffmpegio_skip(FFMPEGIOContext *ctx) { return 0; }
+
+void ffmpegio_frame_rgba_decode(AVFrame *frame, uint8_t *dst) {
+  // Setup context for resizing/reformatting frame.
+  struct SwsContext *sw_ctx =
+      sws_getContext(frame->width, frame->height, frame->format, frame->width,
+                     frame->height, AV_PIX_FMT_RGBA, 0, NULL, NULL, NULL);
+  // Resize/reformat frame.
+  // 32 bbp for rgba divided by 8 bits per byte times width of image.
+  int dst_stride[1] = {(32 / 8) * frame->width};
+  uint8_t *dst_slice[1] = {dst};
+  sws_scale(sw_ctx, (const uint8_t *const *)frame->data, frame->linesize, 0,
+            frame->height, dst_slice, dst_stride);
+}
+
 FFMPEGIOError ffmpegio_close(FFMPEGIOContext *ctx) {
   if (ctx->packet != NULL) av_packet_unref(ctx->packet);
   if (ctx->input_ctx != NULL) avformat_close_input(&(ctx->input_ctx));

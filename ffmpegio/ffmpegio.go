@@ -1,7 +1,7 @@
 package ffmpegio
 
 /*
-#cgo pkg-config: libavdevice libavformat libavfilter libavcodec libswresample libswscale libavutil 
+#cgo pkg-config: libavdevice libavformat libavfilter libavcodec libswresample libswscale libavutil
 #include <stdlib.h>
 
 #include <libavcodec/avcodec.h>
@@ -12,6 +12,7 @@ package ffmpegio
 import "C"
 import (
 	"errors"
+	"image"
 	"unsafe"
 )
 
@@ -78,18 +79,40 @@ func (ctx *Context) Valid(filepath string) bool { return ctx.valid }
 func (ctx *Context) Read(frame *Frame) error {
 	ret := C.ffmpegio_read(ctx.ctx, frame.frame)
 	err := FFMPEGIOError(ret)
-	if err == GoFFMPEGIO_ERROR_NONE {
+	switch err {
+	case GoFFMPEGIO_ERROR_NONE:
+		frame.valid = true
 		return nil
+	case GoFFMPEGIO_ERROR_SKIP:
+		frame.valid = true
+	default:
+		frame.valid = false
 	}
-	// if err < GoFFMPEGIO_ERROR_NONE {
-	// 	ctx.valid = false
-	// 	frame.valid = false
-	// }
 	return err
 }
+
 func (ctx *Context) Skip() error {
 	return FFMPEGIOError(0)
 }
+
+// Image returns a copy of the image in the current frame.
+func (ctx *Context) Image(frame *Frame) (image.Image, error) {
+	if !frame.valid {
+		return nil, GoFFMPEGIO_ERROR_INVALID
+	}
+
+	// Create a new image with the correct dimensions return if 0x0.
+	rect := image.Rect(0, 0, int(frame.frame.width), int(frame.frame.height))
+	ret := image.NewRGBA(rect)
+	if len(ret.Pix) < 0 {
+		return ret, nil
+	}
+
+	// Decode frame into image buffer as rgba data.
+	C.ffmpegio_frame_rgba_decode(frame.frame, (*C.uint8_t)(unsafe.Pointer(&ret.Pix[0])))
+	return ret, nil
+}
+
 func (ctx *Context) Close() error {
 	if ctx == nil {
 		return GoFFMPEGIO_ERROR_INVALID

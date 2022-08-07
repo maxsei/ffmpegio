@@ -3,7 +3,11 @@ package ffmpegio
 import (
 	"testing"
 
+	"bytes"
+	"crypto/md5"
 	"github.com/stretchr/testify/assert"
+	"image/png"
+	"fmt"
 )
 
 const samplePath = "../sample.mp4"
@@ -15,7 +19,7 @@ func TestContextClose(t *testing.T) {
 		t.Fatal(t)
 	}
 	// Try closing context.
-	defer func(){
+	defer func() {
 		if r := recover(); r != nil {
 			t.Fatalf("panic in ctx.Close(): %v", r)
 		}
@@ -72,4 +76,42 @@ loop:
 	// Check number of actual frames in picture.
 	assert.Equal(t, frameCountExpected, maxFrameNum+1, "maxFrameNum + 1")
 	assert.Equal(t, frameCountExpected, frameCount, "frameCount")
+}
+
+func TestFrameImage(t *testing.T) {
+	// Open context to file.
+	ctx, err := OpenContext(samplePath)
+	if err != nil {
+		t.Error(err)
+	}
+	defer ctx.Close()
+
+	// Open Frames to read.
+	frame, err := NewFrame()
+	if err != nil {
+		t.Error(err)
+	}
+	defer frame.Close()
+
+	// Read in a single frame.
+	if err := ctx.Read(frame); err != nil {
+		t.Error(err)
+	}
+
+	// Extract the first frame as an image.
+	img, err := ctx.Image(frame)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Encode data as
+	buf := bytes.NewBuffer([]byte{})
+	if err := png.Encode(buf, img); err != nil {
+		t.Error(err)
+	}
+
+	actual := fmt.Sprintf("%x", md5.Sum(buf.Bytes()))
+	// ffmpeg -i ./sample.mp4 -r 1 -f image2 ./sample-frame1.png && md5sum ./sample-frame1.png
+	const expected string = "8a95fcbdc4c1418edaa2c2cf76d05c71"
+	assert.Equal(t, expected, actual)
 }

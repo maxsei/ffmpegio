@@ -38,6 +38,7 @@ void ffmpegio_init(FFMPEGIOContext *ctx);
 FFMPEGIOError ffmpegio_open(FFMPEGIOContext *ctx, char *filepath);
 FFMPEGIOError ffmpegio_read(FFMPEGIOContext *ctx, AVFrame *frame);
 FFMPEGIOError ffmpegio_skip(FFMPEGIOContext *ctx);
+void ffmpegio_frame_rgba_decode(AVFrame *frame, uint8_t *buf);
 FFMPEGIOError ffmpegio_close(FFMPEGIOContext *ctx);
 
 #endif
