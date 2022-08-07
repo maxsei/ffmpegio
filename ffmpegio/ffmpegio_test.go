@@ -3,8 +3,9 @@ package ffmpegio
 import (
 	"bytes"
 	"crypto/md5"
+	"encoding/gob"
 	"fmt"
-	"image/png"
+	"image"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -103,15 +104,38 @@ func TestFrameImage(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
-	// Encode data as
-	buf := bytes.NewBuffer([]byte{})
-	if err := png.Encode(buf, img); err != nil {
-		t.Error(err)
+	// Rotate image 90 degrees.
+	imgRot := image.NewRGBA(image.Rect(0, 0, img.Bounds().Max.Y, img.Bounds().Max.X))
+	for i := 0; i < imgRot.Bounds().Max.X; i++ {
+		for j := 0; j < imgRot.Bounds().Max.Y; j++ {
+			imgRot.Set(i, j, img.At(j, img.Bounds().Max.Y-i-1))
+		}
 	}
 
+	/*
+				// Open sample image.
+		    // ffmpeg -i ./sample.mp4 -r 1 -frames:v 1 ./sample-frame1.png
+				f, err := os.Open("../sample-frame1.png")
+				if err != nil {
+					t.Error(err)
+				}
+				defer f.Close()
+				imgSamp, err := png.Decode(f)
+				if err != nil {
+					t.Error(err)
+				}
+				buf := bytes.NewBuffer([]byte{})
+				if err := gob.NewEncoder(buf).Encode(imgSamp); err != nil {
+					t.Error(err)
+				}
+				t.Logf("%x\n", md5.Sum(buf.Bytes())) // 3e699d77f307633af199ab1748c25cf6
+	*/
+	const expected string = "3e699d77f307633af199ab1748c25cf6"
+
+	buf := bytes.NewBuffer([]byte{})
+	if err := gob.NewEncoder(buf).Encode(imgRot); err != nil {
+		t.Error(err)
+	}
 	actual := fmt.Sprintf("%x", md5.Sum(buf.Bytes()))
-	// ffmpeg -i ./sample.mp4 -r 1 -f image2 ./sample-frame1.png && md5sum ./sample-frame1.png
-	const expected string = "8a95fcbdc4c1418edaa2c2cf76d05c71"
 	assert.Equal(t, expected, actual)
 }
