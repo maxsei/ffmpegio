@@ -98,12 +98,15 @@ void ffmpegio_frame_rgba_decode(AVFrame *frame, uint8_t *dst) {
   struct SwsContext *sw_ctx =
       sws_getContext(frame->width, frame->height, frame->format, frame->width,
                      frame->height, AV_PIX_FMT_RGBA, 0, NULL, NULL, NULL);
+
   // Resize/reformat frame.
   // 32 bbp for rgba divided by 8 bits per byte times width of image.
   int dst_stride[1] = {(32 / 8) * frame->width};
   uint8_t *dst_slice[1] = {dst};
   sws_scale(sw_ctx, (const uint8_t *const *)frame->data, frame->linesize, 0,
             frame->height, dst_slice, dst_stride);
+
+  sws_freeContext(sw_ctx);
 }
 
 FFMPEGIOError ffmpegio_close(FFMPEGIOContext *ctx) {

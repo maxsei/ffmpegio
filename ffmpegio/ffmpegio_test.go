@@ -1,13 +1,13 @@
 package ffmpegio
 
 import (
-	"testing"
-
 	"bytes"
 	"crypto/md5"
-	"github.com/stretchr/testify/assert"
-	"image/png"
 	"fmt"
+	"image/png"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const samplePath = "../sample.mp4"

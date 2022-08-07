@@ -38,6 +38,7 @@ debug: $(SOURCES_C) $(SOURCES_GO)
 fmt: $(SOURCES_C) $(SOURCES_GO) $(EXAMPLE_C)
 	clang-format -i --style=google $(EXAMPLE_C) $(SOURCES_C)
 	go fmt $(SOURCES_GO)
+	go run golang.org/x/tools/cmd/goimports@latest -w $(SOURCES_GO)
 clean:
 	go clean -testcache -cache
 	rm -f $(filter-out bin/.gitkeep, $(wildcard bin/*))
