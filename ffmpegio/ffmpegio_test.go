@@ -100,7 +100,7 @@ func TestFrameImage(t *testing.T) {
 	}
 
 	// Extract the first frame as an image.
-	img, err := ctx.Image(frame)
+	img, err := frame.ImageRGBA()
 	if err != nil {
 		t.Error(err)
 	}

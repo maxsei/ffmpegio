@@ -94,25 +94,6 @@ func (ctx *Context) Read(frame *Frame) error {
 func (ctx *Context) Skip() error {
 	return FFMPEGIOError(0)
 }
-
-// Image returns a copy of the image in the current frame.
-func (ctx *Context) Image(frame *Frame) (image.Image, error) {
-	if !frame.valid {
-		return nil, GoFFMPEGIO_ERROR_INVALID
-	}
-
-	// Create a new image with the correct dimensions return if 0x0.
-	rect := image.Rect(0, 0, int(frame.frame.width), int(frame.frame.height))
-	ret := image.NewRGBA(rect)
-	if len(ret.Pix) < 0 {
-		return ret, nil
-	}
-
-	// Decode frame into image buffer as rgba data.
-	C.ffmpegio_frame_rgba_decode(frame.frame, (*C.uint8_t)(unsafe.Pointer(&ret.Pix[0])))
-	return ret, nil
-}
-
 func (ctx *Context) Close() error {
 	if ctx == nil {
 		return GoFFMPEGIO_ERROR_INVALID
@@ -141,6 +122,25 @@ type Frame struct {
 }
 
 func (f *Frame) Valid() bool { return f.valid }
+
+// ImageRGBA returns a copy of the frame as an RGBA image. Sometimes depending on the video info, the frame may be rotated!
+func (frame *Frame) ImageRGBA() (image.Image, error) {
+	if !frame.valid {
+		return nil, GoFFMPEGIO_ERROR_INVALID
+	}
+
+	// Create a new image with the correct dimensions return if 0x0.
+	rect := image.Rect(0, 0, int(frame.frame.width), int(frame.frame.height))
+	ret := image.NewRGBA(rect)
+	if len(ret.Pix) < 0 {
+		return ret, nil
+	}
+
+	// Decode frame into image buffer as rgba data.
+	C.ffmpegio_frame_rgba_decode(frame.frame, (*C.uint8_t)(unsafe.Pointer(&ret.Pix[0])))
+	return ret, nil
+}
+
 
 func (f *Frame) Close() error {
 	if f == nil {
