@@ -112,24 +112,23 @@ func TestFrameImage(t *testing.T) {
 		}
 	}
 
-	/*
-				// Open sample image.
-		    // ffmpeg -i ./sample.mp4 -r 1 -frames:v 1 ./sample-frame1.png
-				f, err := os.Open("../sample-frame1.png")
-				if err != nil {
-					t.Error(err)
-				}
-				defer f.Close()
-				imgSamp, err := png.Decode(f)
-				if err != nil {
-					t.Error(err)
-				}
-				buf := bytes.NewBuffer([]byte{})
-				if err := gob.NewEncoder(buf).Encode(imgSamp); err != nil {
-					t.Error(err)
-				}
-				t.Logf("%x\n", md5.Sum(buf.Bytes())) // 3e699d77f307633af199ab1748c25cf6
-	*/
+	// // Open sample image.
+	// // ffmpeg -i ./sample.mp4 -r 1 -frames:v 1 ./sample-frame1.png
+	// f, err := os.Open("../sample-frame1.png")
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	// defer f.Close()
+	// imgSamp, err := png.Decode(f)
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	// buf := bytes.NewBuffer([]byte{})
+	// if err := gob.NewEncoder(buf).Encode(imgSamp); err != nil {
+	// 	t.Error(err)
+	// }
+	// t.Logf("%x\n", md5.Sum(buf.Bytes())) // 3e699d77f307633af199ab1748c25cf6
+
 	const expected string = "3e699d77f307633af199ab1748c25cf6"
 
 	buf := bytes.NewBuffer([]byte{})
