@@ -41,6 +41,10 @@ const (
 type FFMPEGIOError int
 
 func (err FFMPEGIOError) Error() string {
+	switch err {
+	case GoFFMPEGIO_ERROR_INVALID:
+		return "GoFFMPEGIO_ERROR_INVALID"
+	}
 	p := C.ffmpegio_error(C.FFMPEGIOError(err))
 	s := C.GoString(p)
 	return s
