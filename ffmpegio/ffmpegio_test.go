@@ -139,3 +139,15 @@ func TestFrameImage(t *testing.T) {
 	actual := fmt.Sprintf("%x", md5.Sum(buf.Bytes()))
 	assert.Equal(t, expected, actual)
 }
+
+func TestInvalidFrameImage(t *testing.T) {
+	frame, err := NewFrame()
+	if err != nil {
+		t.Error(err)
+	}
+	defer frame.Close()
+	_, err = frame.ImageRGBA()
+
+	assert.Equal(t, err, GoFFMPEGIO_ERROR_INVALID)
+	assert.Equal(t, err.Error(), "GoFFMPEGIO_ERROR_INVALID")
+}

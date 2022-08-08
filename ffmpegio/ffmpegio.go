@@ -145,7 +145,6 @@ func (frame *Frame) ImageRGBA() (image.Image, error) {
 	return ret, nil
 }
 
-
 func (f *Frame) Close() error {
 	if f == nil {
 		return GoFFMPEGIO_ERROR_INVALID
